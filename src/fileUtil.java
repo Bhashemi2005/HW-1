@@ -1,9 +1,10 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class fileUtil {
     static void writeAdmin(Admin admin) {
@@ -73,7 +74,64 @@ public class fileUtil {
             throw new Exception(e);
         }
     }
-    static Course readCourse(String s) {
+    static Set<String> listData(String dir) {
+        return Stream.of(new File(dir).listFiles())
+                .map(File::getName)
+                .collect(Collectors.toSet());
+    }
+    static String findDepartment(String code) {
+        String current = "src/file/departments";
+        Set<String> departments = listData(current);
+        for (String department: departments) {
+            Set<String> courseList = listData(current + "/" + department);
+            for (String s: courseList)
+                if (s.equals(code))
+                    return department;
+        }
         return null;
+    }
+    static Course readCourse(String s) {
+        try {
+            String department = findDepartment(s);
+            File file = new File("src/file/departments/" + department + "/" + s);
+            Scanner sc = new Scanner(file);
+            String type = sc.next();
+            Course course = (type.equals("General")? new General(): new Specialized());
+            course.setName(sc.next());
+            course.setTeacher(sc.next());
+            course.setFinalExam(sc.next());
+            course.setMidtermExam(sc.next());
+            course.setCapacity(sc.nextInt());
+            course.setUnit(sc.nextInt());
+            for (int day = 0; day < 7; day++)
+                for (int hour = 0; hour < 24; hour++)
+                    for (int i = 0; i < 2; i++)
+                        course.getTimeTable().setCell(day, hour, i, (sc.nextInt() == 1));
+            while (sc.hasNext())
+                course.getStudentList().add(sc.next());
+            return course;
+        } catch (Exception e) {
+            System.out.println("Something went wrong. please try again later");
+            return null;
+        }
+    }
+    static void writeCourse(Course course) throws IOException {
+        try {
+            File file = new File(course.getPath());
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(course.getType() + "\n");
+            fileWriter.append(course.getName() + "\n");
+            fileWriter.append(course.getTeacher() + "\n");
+            fileWriter.append(course.getFinalExam() + "\n");
+            fileWriter.append(course.getMidtermExam() + "\n");
+            fileWriter.append(course.getCapacity() + "\n");
+            fileWriter.append(course.getUnit() + "\n");
+            fileWriter.append(course.getTimeTable().toString());
+            for (String student: course.getStudentList())
+                fileWriter.append(student + "\n");
+            fileWriter.close();
+        } catch (Exception e) {
+            System.out.println("something went wrong please try again later");
+        }
     }
 }

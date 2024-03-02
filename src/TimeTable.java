@@ -79,9 +79,24 @@ public class TimeTable {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 24; j++)
                 for (int k = 0; k < 2; k++)
-                    result += table[i][j][k] + " ";
+                    result += (table[i][j][k]? "1": "0") + " ";
             result += "\n";
         }
         return result;
+    }
+    public void writeForUser() {
+        System.out.print(" ".repeat(9));
+        for (int i = 7;  i < 20; i++) {
+            System.out.printf("%2d:00 |%2d:30 |", i, i);
+        }
+        System.out.println();
+        for (int day = 0; day < 7; day++) {
+            System.out.printf("%9s", getDay(day));
+            for (int i = 7; i < 20; i++) {
+                for (int j = 0; j < 2; j++)
+                    System.out.printf("%6s|", (table[day][i][j]? "■".repeat(6): " "));
+            }
+            System.out.println();
+        }
     }
 }
