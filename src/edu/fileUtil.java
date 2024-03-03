@@ -1,3 +1,4 @@
+package edu;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,9 +8,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class fileUtil {
-    static void writeAdmin(Admin admin) {
+    public static void writeAdmin(Admin admin) {
         try {
-            File file = new File("src/file/admin");
+            File file = new File("src/edu/file/admin");
             if(!file.exists()) file.createNewFile();
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(admin.getPassword());
@@ -18,9 +19,9 @@ public class fileUtil {
             System.out.println("Something went wrong. Please try again later");
         }
     }
-    static Admin readAdmin() {
+    public static Admin readAdmin() {
         try {
-            File file = new File("src/file/admin");
+            File file = new File("src/edu/file/admin");
             Scanner sc = new Scanner(file);
             return new Admin(sc.next());
         } catch (Exception e) {
@@ -28,9 +29,9 @@ public class fileUtil {
             return null;
         }
     }
-    static void writeStudent(Student student) {
+    public static void writeStudent(Student student) {
         try {
-            File file = new File("src/file/students/" + student.getUsername());
+            File file = new File("src/edu/file/students/" + student.getUsername());
             file.createNewFile();
             FileWriter fileWriter = new FileWriter(file);
             // write password
@@ -53,9 +54,9 @@ public class fileUtil {
             System.out.println("Something went wrong. Please try again later");
         }
     }
-    static Student readStudent(String code) throws Exception {
+    public static Student readStudent(String code) throws Exception {
         try {
-            File file = new File("src/file/students/" + code);
+            File file = new File("src/edu/file/students/" + code);
             if (!file.exists()) {
                 System.out.println("This username does not exist!");
                 return null;
@@ -74,13 +75,19 @@ public class fileUtil {
             throw new Exception(e);
         }
     }
-    static Set<String> listData(String dir) {
+    public static Set<String> listData(String dir) {
         return Stream.of(new File(dir).listFiles())
                 .map(File::getName)
                 .collect(Collectors.toSet());
     }
-    static String findDepartment(String code) {
-        String current = "src/file/departments";
+    public static boolean hasStudent(String code) {
+        for (String s: listData("src/edu/file/students"))
+            if (code.equals(s))
+                return true;
+        return false;
+    }
+    public static String findDepartment(String code) {
+        String current = "src/edu/file/departments";
         Set<String> departments = listData(current);
         for (String department: departments) {
             Set<String> courseList = listData(current + "/" + department);
@@ -90,13 +97,15 @@ public class fileUtil {
         }
         return null;
     }
-    static Course readCourse(String s) {
+    public static Course readCourse(String s) {
         try {
             String department = findDepartment(s);
-            File file = new File("src/file/departments/" + department + "/" + s);
+            File file = new File("src/edu/file/departments/" + department + "/" + s);
             Scanner sc = new Scanner(file);
             String type = sc.next();
             Course course = (type.equals("General")? new General(): new Specialized());
+            course.setDepartment(department);
+            course.setCode(s);
             course.setName(sc.next());
             course.setTeacher(sc.next());
             course.setFinalExam(sc.next());
@@ -115,7 +124,7 @@ public class fileUtil {
             return null;
         }
     }
-    static void writeCourse(Course course) throws IOException {
+    public static void writeCourse(Course course) throws IOException {
         try {
             File file = new File(course.getPath());
             FileWriter fileWriter = new FileWriter(file);

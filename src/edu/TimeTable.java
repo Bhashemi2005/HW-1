@@ -1,4 +1,4 @@
-import java.util.Locale;
+package edu;
 
 public class TimeTable {
     private boolean[][][] table = new boolean[7][24][2];
