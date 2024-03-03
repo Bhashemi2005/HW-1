@@ -13,7 +13,7 @@ public class Application {
     static String currentUser;
     static String currentDepartment;
     private enum Page {
-        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment
+        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment, addCourse, removeCourse
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
@@ -81,7 +81,23 @@ public class Application {
         runFunction(Page.adminDepartment);
     }
     private static void onAdminDepartment() {
-
+        Write.println("This is the add/remove course page.", "Orange");
+        Write.println("to add a course write \"add\" and to remove a course write \"remove\"", "Orange");
+        Write.println("If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Scanner sc = new Scanner(System.in);
+        String type = sc.next();
+        if (type.equals("add"))
+            runFunction(Page.addCourse);
+        else if (type.equals("remove")) {
+            runFunction(Page.removeCourse);
+        }
+        else if (type.equals("back")) {
+            runFunction(Page.back);
+        }
+        else {
+            Write.println("Command not found!", "Pink");
+            runFunction(Page.adminDepartment);
+        }
     }
     private static void onStudent() {
 
