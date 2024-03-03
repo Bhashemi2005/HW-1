@@ -54,7 +54,7 @@ public class fileUtil {
             System.out.println("Something went wrong. Please try again later");
         }
     }
-    public static Student readStudent(String code) throws Exception {
+    public static Student readStudent(String code) {
         try {
             File file = new File("src/edu/file/students/" + code);
             if (!file.exists()) {
@@ -72,7 +72,8 @@ public class fileUtil {
                 student.getCourseList().add(readCourse(sc.next()));
             return student;
         } catch (Exception e) {
-            throw new Exception(e);
+            System.out.println("something went wrong. please try again later");
+            return null;
         }
     }
     public static Set<String> listData(String dir) {
