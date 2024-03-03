@@ -2,6 +2,7 @@ package edu;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,6 +55,17 @@ public class fileUtil {
             System.out.println("Something went wrong. Please try again later");
         }
     }
+    public static Set<String> readDepartmentList() {
+        return listData("src/edu/file/departments");
+    }
+    public static Set<String> readCourseList(String department) {
+        Set<String> courses = listData("src/edu/file/departments/" + department);
+        Set<String> result = new HashSet<>();
+        for (String s: courses) {
+            result.add("[" + s + ": " + readCourse(s).getName() + "]");
+        }
+        return result;
+    }
     public static Student readStudent(String code) {
         try {
             File file = new File("src/edu/file/students/" + code);
@@ -84,6 +96,12 @@ public class fileUtil {
     public static boolean hasStudent(String code) {
         for (String s: listData("src/edu/file/students"))
             if (code.equals(s))
+                return true;
+        return false;
+    }
+    public static boolean hasDepartment(String department) {
+        for (String s: listData("src/edu/file/departments"))
+            if (department.equals(s))
                 return true;
         return false;
     }
@@ -125,7 +143,7 @@ public class fileUtil {
             return null;
         }
     }
-    public static void writeCourse(Course course) throws IOException {
+    public static void writeCourse(Course course) {
         try {
             File file = new File(course.getPath());
             FileWriter fileWriter = new FileWriter(file);

@@ -4,19 +4,23 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
 
 import static java.time.Clock.system;
 
 public class Application {
     private static ArrayList<Page> functionSequence;
     static String currentUser;
+    static String currentDepartment;
     private enum Page {
-        firstPage, logIn, signUp, back, admin, student
+        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
             functionSequence.removeLast();
-            runFunction(functionSequence.getLast());
+            Page p = functionSequence.getLast();
+            functionSequence.removeLast();
+            runFunction(p);
             return;
         }
         Write.println("-".repeat(100), "Yellow");
@@ -31,11 +35,14 @@ public class Application {
             case Page.logIn:
                 onlogIn();
                 return;
-            case Page.admin:
-                onAdmin();
+            case Page.firstAdmin:
+                onFirstAdmin();
                 return;
-            case Page.student:
+            case Page.firstStudent:
                 onStudent();
+                return;
+            case Page.adminDepartment:
+                onAdminDepartment();
                 return;
         }
     }
@@ -52,7 +59,28 @@ public class Application {
             runFunction(Page.firstPage);
         }
     }
-    private static void onAdmin() {
+    private static void onFirstAdmin() {
+        Write.println("This is the admin page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Write.println("*".repeat(25) + "Department list" + "*".repeat(25), "Green");
+        Set<String> departmentList = fileUtil.readDepartmentList();
+        for (String s: departmentList) System.out.println(" ".repeat(33 - s.length() / 2) + s);
+        Write.println("*".repeat(65), "Green");
+        String department = "";
+        Scanner sc = new Scanner(System.in);
+        while (!fileUtil.hasDepartment(department)) {
+            Write.print("Choose department ", "Green"); department = sc.next();
+            if (department.equals("back")) {
+                runFunction(Page.back);
+                return;
+            }
+            if (fileUtil.hasDepartment(department))
+                break;
+            Write.println("invalid department", "pink");
+        }
+        currentDepartment = department;
+        runFunction(Page.adminDepartment);
+    }
+    private static void onAdminDepartment() {
 
     }
     private static void onStudent() {
@@ -60,7 +88,7 @@ public class Application {
     }
     private static void onlogIn() {
         Scanner sc = new Scanner(System.in);
-        Write.println("This is the log in page. If you want to go to the previous page, type \"back\" at any time", "Pink");
+        Write.println("This is the log in page. If you want to go to the previous page, type \"back\" at any time", "Orange");
         Write.print("Please enter your StudentId: ", "Green");
         String id = sc.next();
         if (id.equals("back")) {
@@ -92,18 +120,19 @@ public class Application {
         }
         if (id.equals("admin")) {
             currentUser = "admin";
-            runFunction(Page.admin);
+            runFunction(Page.firstAdmin);
             return;
         }
         else {
             currentUser = id;
-            runFunction(Page.student);
+            runFunction(Page.firstStudent);
             return;
         }
     }
+
     private static void onSignUp() {
         Scanner sc = new Scanner(System.in);
-        Write.println("This is the sign up page. If you want to go to the previous page, type \"back\" at any time", "Pink");
+        Write.println("This is the sign up page. If you want to go to the previous page, type \"back\" at any time", "Orange");
         Write.print("Please enter your StudentId: ", "Green");
         String id = sc.next();
         if (id.equals("back")) {
