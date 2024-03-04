@@ -10,6 +10,7 @@ import static java.time.Clock.system;
 
 public class Application {
     private static ArrayList<Page> functionSequence;
+    static Scanner sc = new Scanner(System.in);
     static String currentUser;
     static String currentDepartment;
     private enum Page {
@@ -44,6 +45,89 @@ public class Application {
             case Page.adminDepartment:
                 onAdminDepartment();
                 return;
+            case Page.addCourse:
+                onAddCourse();
+                return;
+        }
+    }
+    private static String next() {
+        String s = sc.next();
+        if (s.equals("back")) {
+            runFunction(Page.back);
+            return null;
+        }
+        return s;
+    }
+    private static String nextLine() {
+        String s = sc.nextLine();
+        if (s.equals("back")) {
+            runFunction(Page.back);
+            return null;
+        }
+        return s;
+    }
+    private static void onAddCourse() {
+        try {
+            Write.println("This is the add course. If you want to go to the previous page, type \"back\" at any time", "Orange");
+            Course course;
+            do {
+                Write.print("course type:(General/Specialized) ", "green");
+                String type = next();
+                if (type.toLowerCase().equals("general")) {
+                    course = new General();
+                    break;
+                } else if (type.toLowerCase().equals("specialized")) {
+                    course = new Specialized();
+                    break;
+                } else
+                    Write.println("type not found!", "pink");
+            } while (true);
+            course.setDepartment(currentDepartment);
+            Write.print("course teacher: ", "green");
+            course.setTeacher(next());
+            Write.print("course name: ", "green");
+            course.setName(next());
+            Write.print("course code: ", "green");
+            course.setCode(next());
+            Write.print("course unit: ", "green");
+            course.setUnit(Integer.valueOf(next()));
+            Write.print("course capacity: ", "green");
+            course.setCapacity(Integer.valueOf(next()));
+            Write.print("course final exam: ", "green");
+            course.setFinalExam(next());
+            Write.print("course midterm exam: ", "green");
+            course.setMidtermExam(next());
+            course.setStudentList(new ArrayList<>());
+            // todo get time intervals
+            String command = "";
+            Write.println("to add a time you should follow this format: \"day hour minute\"", "orange");
+            Write.println("days: saturday, sunday, monday, tuesday, wednesday, thursday, friday", "orange");
+            Write.println("hourse: 0, 1, 2, 3, ..., 23", "orange");
+            Write.println("minutes: 0-> start from hour:00 1-> start from hour:30", "orange");
+            while (true) {
+                Write.print("to add time interval, type \"add\" and to break cycly, type \"break\" ", "green");
+                command = next();
+                if (command.equals("break")) break;
+                if (!command.equals("add")) {
+                    Write.println("Command not found!", "pink");
+                    continue;
+                }
+                Write.print("please enter the interval opening: ", "green");
+                String day1 = next();
+                int hour1 = Integer.valueOf(next());
+                int minute1 = Integer.valueOf(next());
+                Write.print("please enter the interval closing: ", "green");
+                String day2 = next();
+                int hour2 = Integer.valueOf(next());
+                int minute2 = Integer.valueOf(next());
+                course.getTimeTable().addInterval(day1, hour1, minute1, day2, hour2, minute2);
+            }
+            fileUtil.writeCourse(course);
+            Write.println("Course has been successfully made", "Yellow");
+            runFunction(Page.back);
+        } catch (Exception e) {
+            Write.println("something went wrong. please try again later", "pink");
+            runFunction(Page.back);
         }
     }
     private static void onFirstPage() {
@@ -68,11 +152,7 @@ public class Application {
         String department = "";
         Scanner sc = new Scanner(System.in);
         while (!fileUtil.hasDepartment(department)) {
-            Write.print("Choose department ", "Green"); department = sc.next();
-            if (department.equals("back")) {
-                runFunction(Page.back);
-                return;
-            }
+            Write.print("Choose department ", "Green"); department = next();
             if (fileUtil.hasDepartment(department))
                 break;
             Write.println("invalid department", "pink");
@@ -81,18 +161,14 @@ public class Application {
         runFunction(Page.adminDepartment);
     }
     private static void onAdminDepartment() {
-        Write.println("This is the add/remove course page.", "Orange");
-        Write.println("to add a course write \"add\" and to remove a course write \"remove\"", "Orange");
-        Write.println("If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Write.println("This is the add/remove course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Write.print("to add a course write \"add\" and to remove a course write \"remove\" ", "green");
         Scanner sc = new Scanner(System.in);
-        String type = sc.next();
+        String type = next();
         if (type.equals("add"))
             runFunction(Page.addCourse);
         else if (type.equals("remove")) {
             runFunction(Page.removeCourse);
-        }
-        else if (type.equals("back")) {
-            runFunction(Page.back);
         }
         else {
             Write.println("Command not found!", "Pink");
@@ -105,34 +181,18 @@ public class Application {
     private static void onlogIn() {
         Scanner sc = new Scanner(System.in);
         Write.println("This is the log in page. If you want to go to the previous page, type \"back\" at any time", "Orange");
-        Write.print("Please enter your StudentId: ", "Green");
-        String id = sc.next();
-        if (id.equals("back")) {
-            runFunction(Page.back);
-            return;
-        }
+        Write.print("Please enter your Id: ", "Green");
+        String id = next();
         while (!fileUtil.hasStudent(id) && !id.equals("admin")) {
             Write.println("This username does not exit. please try another one", "pink");
-            Write.print("Please enter your StudentId: ", "Green");
-            id = sc.next();
-            if (id.equals("back")) {
-                runFunction(Page.back);
-                return;
-            }
+            Write.print("Please enter your Id: ", "Green");
+            id = next();
         }
         String PASSWORD = (id.equals("admin")? fileUtil.readAdmin().getPassword(): fileUtil.readStudent(id).getPassword());
-        Write.print("Please enter your password: ", "Green"); String password = sc.next();
-        if (password.equals("back")) {
-            runFunction(Page.back);
-            return;
-        }
+        Write.print("Please enter your password: ", "Green"); String password = next();
         while (!password.equals(PASSWORD)) {
             Write.println("Wrong password. please try again", "pink");
-            Write.print("Please enter your password: ", "Green"); password = sc.next();
-            if (password.equals("back")) {
-                runFunction(Page.back);
-                return;
-            }
+            Write.print("Please enter your password: ", "Green"); password = next();
         }
         if (id.equals("admin")) {
             currentUser = "admin";
@@ -149,27 +209,15 @@ public class Application {
     private static void onSignUp() {
         Scanner sc = new Scanner(System.in);
         Write.println("This is the sign up page. If you want to go to the previous page, type \"back\" at any time", "Orange");
-        Write.print("Please enter your StudentId: ", "Green");
-        String id = sc.next();
-        if (id.equals("back")) {
-            runFunction(Page.back);
-            return;
-        }
+        Write.print("Please enter your Id: ", "Green");
+        String id = next();
         while (fileUtil.hasStudent(id) || id.equals("admin")) {
             Write.println("This username already exits. please try another one", "pink");
-            Write.print("Please enter your StudentId: ", "Green");
-            id = sc.next();
-            if (id.equals("back")) {
-                runFunction(Page.back);
-                return;
-            }
+            Write.print("Please enter your Id: ", "Green");
+            id = next();
         }
         Write.print("Please enter your password: ", "Green");
-        String password = sc.next();
-        if(password.equals("back")) {
-            runFunction(Page.back);
-            return;
-        }
+        String password = next();
         Student student = new Student(id, password);
         fileUtil.writeStudent(student);
         Write.println("Your username has been successfully created", "Yellow");
@@ -178,6 +226,7 @@ public class Application {
     }
     static public void runProgramme() {
         Write.println("Welcome", "Yellow");
+        Write.println("To use our programme you should not write white space in any line only the ones we determine", "pink");
         functionSequence = new ArrayList<>();
         runFunction(Page.firstPage);
     }

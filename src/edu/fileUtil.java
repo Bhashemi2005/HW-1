@@ -143,9 +143,10 @@ public class fileUtil {
             return null;
         }
     }
-    public static void writeCourse(Course course) {
+    public static void writeCourse(Course course) throws Exception {
         try {
-            File file = new File(course.getPath());
+            File file = new File("src/edu/file/departments/" + course.getDepartment() + "/" + course.getCode());
+            file.createNewFile();
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(course.getType() + "\n");
             fileWriter.append(course.getName() + "\n");
@@ -159,7 +160,8 @@ public class fileUtil {
                 fileWriter.append(student + "\n");
             fileWriter.close();
         } catch (Exception e) {
-            System.out.println("something went wrong please try again later");
+            throw new Exception(e);
+            //System.out.println("something went wrong please try again later :((( ");
         }
     }
 }
