@@ -14,7 +14,7 @@ public class Application {
     static String currentUser;
     static String currentDepartment;
     private enum Page {
-        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment, addCourse, removeCourse
+        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment, addCourse, removeCourse, myCourses, allCourses
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
@@ -58,15 +58,7 @@ public class Application {
         }
         return s;
     }
-    private static String nextLine() {
-        String s = sc.nextLine();
-        if (s.equals("back")) {
-            runFunction(Page.back);
-            return null;
-        }
-        return s;
-    }
-    private static void onAddCourse() {
+    private static void onAddCourse() { // Fellan add va modifie yek karo mikonan
         try {
             Write.println("This is the add course. If you want to go to the previous page, type \"back\" at any time", "Orange");
             Course course;
@@ -82,13 +74,13 @@ public class Application {
                 } else
                     Write.println("type not found!", "pink");
             } while (true);
+            Write.print("course code: ", "green");
+            course.setCode(next());
             course.setDepartment(currentDepartment);
             Write.print("course teacher: ", "green");
             course.setTeacher(next());
             Write.print("course name: ", "green");
             course.setName(next());
-            Write.print("course code: ", "green");
-            course.setCode(next());
             Write.print("course unit: ", "green");
             course.setUnit(Integer.valueOf(next()));
             Write.print("course capacity: ", "green");
@@ -176,7 +168,21 @@ public class Application {
         }
     }
     private static void onStudent() {
-
+        Write.println("This is the student page. If you want to go to the previuse page, type \"back\"", "orange");
+        Write.println("To see your courses type \"myCourses\" and to see all Department courses type \"allCourses\"", "green");
+        String type = "";
+        while (true) {
+            type = next();
+            if (type.equals("myCourses")) {
+                runFunction(Page.myCourses);
+                return;
+            }
+            if (type.equals("allCourses")) {
+                runFunction(Page.allCourses);
+                return;
+            }
+            Write.println("Command not found!", "pink");
+        }
     }
     private static void onlogIn() {
         Scanner sc = new Scanner(System.in);
