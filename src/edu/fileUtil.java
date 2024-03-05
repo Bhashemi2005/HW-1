@@ -88,6 +88,13 @@ public class fileUtil {
         File file = new File("src/edu/file/departments/" + department + "/" + code);
         //FileUtils.deleteDirectory(file);
     }
+    public static boolean hasCourse(String code) {
+        Set<String> departments = listData("src/edu/file/departments");
+        for (String s: departments)
+            if (hasCourse(s, code))
+                return true;
+        return false;
+    }
     public static boolean hasStudent(String code) {
         if (code.length() == 0)
             return false;

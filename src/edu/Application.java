@@ -21,13 +21,12 @@ public class Application {
     private static void runFunction(Page page) {
         if (page == Page.back) {
             functionSequence.removeLast();
-            Page p = functionSequence.getLast();
-            functionSequence.removeLast();
-            runFunction(p);
+            runFunction(functionSequence.getLast());
             return;
         }
         Write.println("-".repeat(100), "Yellow");
-        functionSequence.add(page);
+        if (functionSequence.isEmpty() || functionSequence.getLast() != page)
+            functionSequence.add(page);
         switch (page) {
             case Page.firstPage:
                 onFirstPage();
@@ -95,7 +94,32 @@ public class Application {
         }
     }
     private static void onMyCourses() {
-        //todo compelete here
+        Student student = fileUtil.readStudent(currentUser);
+        Write.println("*".repeat(89) + " Time  Table " + "*".repeat(89), "purple");
+        student.getTimeTable().writeForUser();
+        Write.println("*".repeat(191), "purple");
+        Write.println("-".repeat(89) + " course List " + "-".repeat(89), "green");
+        for (Course course : student.getCourseList()) {
+            String s = "[" + course.getCode() + ": " + course.getName() + "]";
+            System.out.println(" ".repeat(95 - s.length() / 2) + s);
+        }
+        Write.println("-".repeat(89) + "-".repeat("course List ".length()) + "-".repeat(89), "green");
+        while (true) {
+            String code;
+            Write.print("To remove a course type it's code ", "green"); code = next();
+            if (!fileUtil.hasCourse(code)) {
+                Write.println("This course does not exist", "pink");
+                continue;
+            }
+            Course course = fileUtil.readCourse(code);
+            if (student.removeCourse(course)) {
+                Write.println("Course has been successfully removed :)", "yellow");
+                course.setCapacity(course.getCapacity() + 1);
+                fileUtil.writeCourse(course);
+                continue;
+            }
+            Write.println("You aren't registered in a course named " + code, "Pink");
+        }
     }
     private static void onAllCourses() {
         Write.println("This is the add course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
@@ -261,7 +285,7 @@ public class Application {
     private static void onStudent() {
         Write.println("This is the student page. If you want to go to the previuse page, type \"back\"", "orange");
         while (true) {
-            Write.print("To see your courses type \"myCourses\" and to see all Department courses type \"allCourses\"" , "green");
+            Write.print("To see your courses type \"myCourses\" and to see all Department courses type \"allCourses\" " , "green");
             String type = next();
             if (type.equals("myCourses")) {
                 runFunction(Page.myCourses);
@@ -321,9 +345,13 @@ public class Application {
         runFunction(Page.back);
     }
     static public void runProgramme() {
-        Write.println("Welcome", "Yellow");
-        Write.println("To use our programme you should not write white space in any line only the ones we determine", "pink");
-        functionSequence = new ArrayList<>();
-        runFunction(Page.firstPage);
+        try {
+            Write.println("Welcome", "Yellow");
+            Write.println("To use our programme you should not write white space in any line only the ones we determine", "pink");
+            functionSequence = new ArrayList<>();
+            runFunction(Page.firstPage);
+        } catch (Exception e) {
+            Write.println("Something went wrong. please try again later", "Pink");
+        }
     }
 }

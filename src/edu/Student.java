@@ -17,15 +17,16 @@ public class Student extends User {
         unit += course.getUnit();
         fileUtil.writeStudent(this);
     }
-    public void removeCourse(Course course) { //Todo complete here
+    public boolean removeCourse(Course course) { //Todo complete here
         for (int i = 0; i < courseList.size(); i++)
             if (courseList.get(i).getCode().equals(course.getCode())) {
                 courseList.remove(i);
                 timeTable.removeTable(course.getTimeTable());
                 unit -= course.getUnit();
                 fileUtil.writeStudent(this);
-                return;
+                return true;
             }
+        return false;
     }
     public ArrayList<Course> getCourseList() {
         return courseList;
