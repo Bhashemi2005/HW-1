@@ -15,6 +15,8 @@ public class Student extends User {
         courseList.add(course);
         timeTable.addTable(course.getTimeTable());
         unit += course.getUnit();
+        course.addStudent(this);
+        fileUtil.writeCourse(course);
         fileUtil.writeStudent(this);
     }
     public boolean removeCourse(Course course) { //Todo complete here
@@ -23,6 +25,8 @@ public class Student extends User {
                 courseList.remove(i);
                 timeTable.removeTable(course.getTimeTable());
                 unit -= course.getUnit();
+                course.removeStudent(this);
+                fileUtil.writeCourse(course);
                 fileUtil.writeStudent(this);
                 return true;
             }

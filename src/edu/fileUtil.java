@@ -21,12 +21,16 @@ public class fileUtil {
         }
     }
     public static Admin readAdmin() {
+        Scanner sc = new Scanner(System.in);
         try {
             File file = new File("src/edu/file/admin");
-            Scanner sc = new Scanner(file);
-            return new Admin(sc.next());
+            sc = new Scanner(file);
+            String s = sc.next();
+            sc.close();
+            return new Admin(s);
         } catch (Exception e) {
             System.out.println("The admin file has been removed");
+            sc.close();
             return null;
         }
     }
@@ -60,19 +64,23 @@ public class fileUtil {
         return listData("src/edu/file/departments/" + department);
     }
     public static Student readStudent(String code) {
+        Scanner sc = new Scanner(System.in);
         try {
             File file = new File("src/edu/file/students/" + code);
             if (!file.exists()) {
                 System.out.println("This username does not exist!");
+                sc.close();
                 return null;
             }
-            Scanner sc = new Scanner(file);
+            sc = new Scanner(file);
             Student student = new Student(code, sc.next());
             while (sc.hasNext())
                 student.addCourse(readCourse(sc.next()));
+            sc.close();
             return student;
         } catch (Exception e) {
             System.out.println("something went wrong. please try again later");
+            sc.close();
             return null;
         }
     }
@@ -86,7 +94,7 @@ public class fileUtil {
     }
     public static void removeCourse(String department, String code) {
         File file = new File("src/edu/file/departments/" + department + "/" + code);
-        //FileUtils.deleteDirectory(file);
+        file.delete();
     }
     public static boolean hasCourse(String code) {
         Set<String> departments = listData("src/edu/file/departments");
@@ -125,10 +133,11 @@ public class fileUtil {
         return null;
     }
     public static Course readCourse(String s) {
+        Scanner sc = new Scanner(System.in);
         try {
             String department = findDepartment(s);
             File file = new File("src/edu/file/departments/" + department + "/" + s);
-            Scanner sc = new Scanner(file);
+            sc = new Scanner(file);
             String type = sc.next();
             Course course = (type.equals("General")? new General(): new Specialized());
             course.setDepartment(department);
@@ -145,9 +154,11 @@ public class fileUtil {
                         course.getTimeTable().setCell(day, hour, i, (sc.nextInt() == 1));
             while (sc.hasNext())
                 course.getStudentList().add(sc.next());
+            sc.close();
             return course;
         } catch (Exception e) {
             System.out.println("Something went wrong. please try again later");
+            sc.close();
             return null;
         }
     }

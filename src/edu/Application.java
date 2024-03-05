@@ -13,9 +13,10 @@ public class Application {
     static Scanner sc = new Scanner(System.in);
     static String currentUser;
     static String currentDepartment;
+    static Course currentCourse;
     private enum Page {
         firstPage, logIn, signUp, back, firstAdmin, firstStudent,
-        adminDepartment, addCourse, removeCourse,
+        adminDepartment, addCourse, removeCourse, modifyCourse, modifyPage,
         myCourses, allCourses, studentDepartments
     }
     private static void runFunction(Page page) {
@@ -24,7 +25,7 @@ public class Application {
             runFunction(functionSequence.getLast());
             return;
         }
-        Write.println("-".repeat(100), "Yellow");
+        Write.println("-".repeat(300), "Yellow");
         if (functionSequence.isEmpty() || functionSequence.getLast() != page)
             functionSequence.add(page);
         switch (page) {
@@ -61,6 +62,100 @@ public class Application {
             case Page.allCourses:
                 onAllCourses();
                 return;
+            case Page.modifyPage:
+                onModifyPage();
+                return;
+            case Page.modifyCourse:
+                onModifyCourse();
+                return;
+        }
+    }
+    private static void onModifyCourse() {
+        try {
+            Write.println("This is the modify course page. If you want to go to the previous page, type \"back\" at any time", "orange");
+            currentCourse.writeForAdmin();
+            while (true){
+                Write.print("To add capacity type \"addCapacity [addAmount]\"" +
+                        ", to add student type \"add [studentId]\", " +
+                        "to remove student type \"remove [studentId]\"", "Green");
+                String type = next();
+                String code = next();
+                if (type.equals("add")) {
+                    // check if student is in course
+                    if (currentCourse.hasStudent(code)) {
+                        Write.println("there is a student with this Id", "Pink");
+                        continue;
+                    }
+                    // check if student id is valid
+                    if (!fileUtil.hasStudent(code)) {
+                        Write.println("Invalid student Id", "Pink");
+                        continue;
+                    }
+                    // check if the course can be added
+                    Student student = fileUtil.readStudent(code);
+                    if (!student.getTimeTable().canAdd(currentCourse.getTimeTable())) {
+                        Write.println("Course hase interference with student schedule", "Pink");
+                        continue;
+                    }
+                    if (currentCourse.getCapacity() == 0) {
+                        Write.println("Course capacity is 0", "Pink");
+                        continue;
+                    }
+                    // add course for student and student to course and reduce capacity
+                    student.addCourse(currentCourse);
+                    Write.println("Student has been successfully added :))", "Yellow");
+                    continue;
+                }
+                if (type.equals("remove")) {
+                    // check if student is in course
+                    if (!currentCourse.hasStudent(code)) {
+                        Write.println("there is no student with this Id", "Pink");
+                        continue;
+                    }
+                    // remove course for student and student from course increase capacity
+                    Student student = fileUtil.readStudent(code);
+                    student.removeCourse(currentCourse);
+                    Write.println("Student has been successfully removed :))", "Yellow");
+                    continue;
+                }
+                if (type.equals("addCapacity")) {
+                    int add = Integer.valueOf(code);
+                    if (add <= 0) {
+                        Write.println("Invalid add amount!", "pink");
+                        continue;
+                    }
+                    currentCourse.setCapacity(currentCourse.getCapacity() + add);
+                    fileUtil.writeCourse(currentCourse);
+                    Write.println("Capacity has been successfully modified :))", "Yellow");
+                    continue;
+                }
+                Write.println("Invalid input", "pink");
+            }
+        } catch (Exception e) {
+            Write.println("Invalid input!", "pink");
+            runFunction(Page.back);
+        }
+    }
+    private static void onModifyPage() {
+        try {
+            Write.println("This is the modify page. If you want to go to the previous page, type \"back\" at any time", "orange");
+            Set<String> courseList = fileUtil.readCourseList(currentDepartment);
+            Write.println("-".repeat(25) + " Course List " + "-".repeat(25), "Green");
+            for (String s : courseList) System.out.println(" ".repeat(32 - s.length() / 2) + s);
+            Write.println("-".repeat(25) + "-".repeat(38), "Green");
+            while (true) {
+                Write.print("To modify a course write it's code ", "green");
+                String course = next();
+                if (!fileUtil.hasCourse(currentDepartment, course)) {
+                    Write.println("Invalid code", "Pink");
+                    continue;
+                }
+                currentCourse = fileUtil.readCourse(course);
+                runFunction(Page.modifyCourse);
+            }
+        } catch (Exception e) {
+            Write.println("Invalid input", "pink");
+            runFunction(Page.back);
         }
     }
     private static void onRemoveCourse() {
@@ -69,7 +164,7 @@ public class Application {
             Set<String> courseList = fileUtil.readCourseList(currentDepartment);
             Write.println("-".repeat(25) + " Course List " + "-".repeat(25), "Green");
             for (String s: courseList) System.out.println(" ".repeat(32 - s.length() / 2) + s);
-            Write.println("-".repeat(25) + " Course List " + "-".repeat(25), "Green");
+            Write.println("-".repeat(25) + "-".repeat(38), "Green");
             while (true) {
                 Write.print("To remove a course write it's code ", "green");
                 String course = next();
@@ -89,83 +184,99 @@ public class Application {
                 fileUtil.removeCourse(currentDepartment, course);
             }
         } catch (Exception e) {
-            Write.println("Something went wrong. please try again later", "pink");
+            Write.println("Invalid input", "pink");
             runFunction(Page.back);
         }
     }
     private static void onMyCourses() {
-        Student student = fileUtil.readStudent(currentUser);
-        Write.println("*".repeat(89) + " Time  Table " + "*".repeat(89), "purple");
-        student.getTimeTable().writeForUser();
-        Write.println("*".repeat(191), "purple");
-        Write.println("-".repeat(89) + " course List " + "-".repeat(89), "green");
-        for (Course course : student.getCourseList()) {
-            String s = "[" + course.getCode() + ": " + course.getName() + "]";
-            System.out.println(" ".repeat(95 - s.length() / 2) + s);
-        }
-        Write.println("-".repeat(89) + "-".repeat("course List ".length()) + "-".repeat(89), "green");
-        while (true) {
-            String code;
-            Write.print("To remove a course type it's code ", "green"); code = next();
-            if (!fileUtil.hasCourse(code)) {
-                Write.println("This course does not exist", "pink");
-                continue;
+        try {
+            Student student = fileUtil.readStudent(currentUser);
+            Write.println("*".repeat(89) + " Time  Table " + "*".repeat(89), "purple");
+            student.getTimeTable().writeForUser();
+            Write.println("*".repeat(191), "purple");
+            Write.println("-".repeat(89) + " course List " + "-".repeat(89), "green");
+            for (Course course : student.getCourseList()) {
+                String s = "[" + course.getCode() + ": " + course.getName() + "]";
+                System.out.println(" ".repeat(95 - s.length() / 2) + s);
             }
-            Course course = fileUtil.readCourse(code);
-            if (student.removeCourse(course)) {
-                Write.println("Course has been successfully removed :)", "yellow");
-                course.setCapacity(course.getCapacity() + 1);
-                fileUtil.writeCourse(course);
-                continue;
+            Write.println("-".repeat(89) + "-".repeat("course List ".length()) + "-".repeat(89), "green");
+            while (true) {
+                String code;
+                Write.print("To remove a course type it's code ", "green");
+                code = next();
+                if (!fileUtil.hasCourse(code)) {
+                    Write.println("This course does not exist", "pink");
+                    continue;
+                }
+                Course course = fileUtil.readCourse(code);
+                if (student.removeCourse(course)) {
+                    Write.println("Course has been successfully removed :)", "yellow");
+                    course.setCapacity(course.getCapacity() + 1);
+                    fileUtil.writeCourse(course);
+                    continue;
+                }
+                Write.println("You aren't registered in a course named " + code, "Pink");
             }
-            Write.println("You aren't registered in a course named " + code, "Pink");
+        } catch (Exception e) {
+            Write.println("Invalid input!", "Pink");
+            runFunction(Page.back);
         }
     }
     private static void onAllCourses() {
-        Write.println("This is the add course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
-        Student student = fileUtil.readStudent(currentUser);
-        // This part has been added for debug
-        System.out.println(student.getUsername());
-        Set<String> courseList = fileUtil.listCourses(currentDepartment);
-       for (String course: courseList)
-           fileUtil.readCourse(course).writeForUser();
-       String code = "";
-       while (true) {
-           Write.print("To add a course type it's code: ", "green");  code = next();
-           if (!fileUtil.hasCourse(currentDepartment, code)) {
-               Write.println("Invalid course code!", "Pink");
-               continue;
-           }
-           Course course = fileUtil.readCourse(code);
-           if (!student.getTimeTable().canAdd(course.getTimeTable())) {
-               Write.println("This course has time interference with previous courses", "Pink");
-               continue;
-           }
-           if (course.getCapacity() == 0) {
-               Write.println("Course capacity is 0!", "Pink");
-               continue;
-           }
-           student.addCourse(course);
-           course.setCapacity(course.getCapacity() - 1);
-           fileUtil.writeCourse(course);
-           Write.println("Course has been successfully added to your course list :)", "Yellow");
-       }
+        try {
+            Write.println("This is the add course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+            Student student = fileUtil.readStudent(currentUser);
+            Set<String> courseList = fileUtil.listCourses(currentDepartment);
+            for (String course : courseList)
+                fileUtil.readCourse(course).writeForUser();
+            String code = "";
+            while (true) {
+                Write.print("To add a course type it's code: ", "green");
+                code = next();
+                if (!fileUtil.hasCourse(currentDepartment, code)) {
+                    Write.println("Invalid course code!", "Pink");
+                    continue;
+                }
+                Course course = fileUtil.readCourse(code);
+                if (!student.getTimeTable().canAdd(course.getTimeTable())) {
+                    Write.println("This course has time interference with previous courses", "Pink");
+                    continue;
+                }
+                if (course.getCapacity() == 0) {
+                    Write.println("Course capacity is 0!", "Pink");
+                    continue;
+                }
+                student.addCourse(course);
+                course.setCapacity(course.getCapacity() - 1);
+                fileUtil.writeCourse(course);
+                Write.println("Course has been successfully added to your course list :)", "Yellow");
+            }
+        } catch (Exception e) {
+            Write.println("Invalid input!", "Pink");
+            runFunction(Page.back);
+        }
     }
     private static void onStudentDepartments() {
-        Write.println("This is the department page. If you want to go to the previous page, type \"back\" at any time", "Orange");
-        Write.println("*".repeat(25) + "Department list" + "*".repeat(25), "Green");
-        Set<String> departmentList = fileUtil.readDepartmentList();
-        for (String s: departmentList) System.out.println(" ".repeat(33 - s.length() / 2) + s);
-        Write.println("*".repeat(65), "Green");
-        String department = "";
-        while (!fileUtil.hasDepartment(department)) {
-            Write.print("Choose department ", "Green"); department = next();
-            if (fileUtil.hasDepartment(department))
-                break;
-            Write.println("invalid department", "pink");
+        try {
+            Write.println("This is the department page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+            Write.println("*".repeat(25) + "Department list" + "*".repeat(25), "Green");
+            Set<String> departmentList = fileUtil.readDepartmentList();
+            for (String s : departmentList) System.out.println(" ".repeat(33 - s.length() / 2) + s);
+            Write.println("*".repeat(65), "Green");
+            String department = "";
+            while (!fileUtil.hasDepartment(department)) {
+                Write.print("Choose department ", "Green");
+                department = next();
+                if (fileUtil.hasDepartment(department))
+                    break;
+                Write.println("invalid department", "pink");
+            }
+            currentDepartment = department;
+            runFunction(Page.allCourses);
+        } catch (Exception e) {
+            Write.println("Invalid input!", "Pink");
+            runFunction(Page.back);
         }
-        currentDepartment = department;
-        runFunction(Page.allCourses);
     }
     private static String next() {
         String s = sc.next();
@@ -235,7 +346,7 @@ public class Application {
             Write.println("Course has been successfully made", "Yellow");
             runFunction(Page.back);
         } catch (Exception e) {
-            Write.println("something went wrong. please try again later", "pink");
+            Write.println("Invalid input", "pink");
             runFunction(Page.back);
         }
     }
@@ -270,13 +381,15 @@ public class Application {
     }
     private static void onAdminDepartment() {
         Write.println("This is the add/remove course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
-        Write.print("to add a course write \"add\" and to remove a course write \"remove\" ", "green");
+        Write.print("to add a course write \"add\", to remove a course write \"remove\" and to modify a course write \"modify\" ", "green");
         String type = next();
         if (type.equals("add"))
             runFunction(Page.addCourse);
         else if (type.equals("remove")) {
             runFunction(Page.removeCourse);
         }
+        else if (type.equals("modify"))
+            runFunction(Page.modifyPage);
         else {
             Write.println("Command not found!", "Pink");
             runFunction(Page.adminDepartment);
@@ -351,7 +464,7 @@ public class Application {
             functionSequence = new ArrayList<>();
             runFunction(Page.firstPage);
         } catch (Exception e) {
-            Write.println("Something went wrong. please try again later", "Pink");
+            Write.println("Invalid input", "Pink");
         }
     }
 }

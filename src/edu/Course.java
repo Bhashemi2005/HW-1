@@ -91,7 +91,24 @@ public class Course {
     public void setTimeTable(TimeTable timeTable) {
         this.timeTable = timeTable;
     }
-
+    public boolean hasStudent(String student) {
+        for (String s: studentList)
+            if (s.equals(student))
+                return true;
+        return false;
+    }
+    public void removeStudent(Student student) {
+        for (int i = 0; i < studentList.size(); i++) {
+            if (studentList.get(i).equals(student.getUsername())) {
+                studentList.remove(i);
+                capacity++;
+            }
+        }
+    }
+    public void addStudent(Student student) {
+        studentList.add(student.getUsername());
+        capacity--;
+    }
     public void setStudentList(ArrayList<String> studentList) {
         this.studentList = studentList;
     }
@@ -108,6 +125,23 @@ public class Course {
         Write.print("Midterm exam: ", "GREEN"); Write.println(getMidtermExam(), "ORANGE");
         Write.print("Unit: ", "GREEN"); Write.println(getUnit() + "", "ORANGE");
         Write.print("Capacity: ", "GREEN"); Write.println(getCapacity() + "", (getCapacity() >= 10? "GRAY": "PINK"));
+        System.out.println();
+        getTimeTable().writeForUser();
+        Write.println("-".repeat(200), "yellow");
+    }
+    public void writeForAdmin() {
+        Write.println("-".repeat(200), "yellow");
+        Write.print("Code: ", "GREEN"); Write.println(getCode(), "ORANGE");
+        Write.print("Type: ", "GREEN"); Write.println(getType(), "ORANGE");
+        Write.print("Name: ", "GREEN"); Write.println(getName(), "ORANGE");
+        Write.print("Teacher: ", "GREEN"); Write.println(getTeacher(), "ORANGE");
+        Write.print("Final exam: ", "GREEN"); Write.println(getFinalExam(), "ORANGE");
+        Write.print("Midterm exam: ", "GREEN"); Write.println(getMidtermExam(), "ORANGE");
+        Write.print("Unit: ", "GREEN"); Write.println(getUnit() + "", "ORANGE");
+        Write.print("Capacity: ", "GREEN"); Write.println(getCapacity() + "", (getCapacity() >= 10? "GRAY": "PINK"));
+        System.out.println();
+        Write.println("Student list: ", "purple");
+        for (String s: studentList) Write.print(s + " ", "purple");
         System.out.println();
         getTimeTable().writeForUser();
         Write.println("-".repeat(200), "yellow");
