@@ -69,6 +69,13 @@ public class TimeTable {
                     this.table[i][j][k] = this.table[i][j][k] | table[i][j][k];
         return true;
     }
+    public void removeTable(TimeTable timeTable) {
+        boolean[][][] table = timeTable.getTable();
+        for (int i = 0; i < 7; i++)
+            for (int j = 0; j < 24; j++)
+                for (int k = 0; k < 2; k++)
+                    this.table[i][j][k] = table[i][j][k]? false: this.table[i][j][k];
+    }
     public boolean[][][] getTable() {
         return table;
     }

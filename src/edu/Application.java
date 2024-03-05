@@ -14,7 +14,9 @@ public class Application {
     static String currentUser;
     static String currentDepartment;
     private enum Page {
-        firstPage, logIn, signUp, back, firstAdmin, firstStudent, adminDepartment, addCourse, removeCourse, myCourses, allCourses
+        firstPage, logIn, signUp, back, firstAdmin, firstStudent,
+        adminDepartment, addCourse, removeCourse,
+        myCourses, allCourses, studentDepartments
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
@@ -48,7 +50,98 @@ public class Application {
             case Page.addCourse:
                 onAddCourse();
                 return;
+            case Page.removeCourse:
+                onRemoveCourse();
+                return;
+            case Page.myCourses:
+                onMyCourses();
+                return;
+            case Page.studentDepartments:
+                onStudentDepartments();
+                return;
+            case Page.allCourses:
+                onAllCourses();
+                return;
         }
+    }
+    private static void onRemoveCourse() {
+        try {
+            Write.println("This is the remove course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+            Set<String> courseList = fileUtil.readCourseList(currentDepartment);
+            Write.println("-".repeat(25) + " Course List " + "-".repeat(25), "Green");
+            for (String s: courseList) System.out.println(" ".repeat(32 - s.length() / 2) + s);
+            Write.println("-".repeat(25) + " Course List " + "-".repeat(25), "Green");
+            while (true) {
+                Write.print("To remove a course write it's code ", "green");
+                String course = next();
+                if (!fileUtil.hasCourse(currentDepartment, course)) {
+                    Write.println("Invalid code", "Pink");
+                    continue;
+                }
+                // modify all students
+                Set<String> students = fileUtil.listStudents();
+                Course course1 = fileUtil.readCourse(course);
+                for (String code: students) {
+                    Student student = fileUtil.readStudent(code);
+                    student.removeCourse(course1);
+                }
+                // modifying finished
+                Write.println("Course has been removed!", "Yellow");
+                fileUtil.removeCourse(currentDepartment, course);
+            }
+        } catch (Exception e) {
+            Write.println("Something went wrong. please try again later", "pink");
+            runFunction(Page.back);
+        }
+    }
+    private static void onMyCourses() {
+        //todo compelete here
+    }
+    private static void onAllCourses() {
+        Write.println("This is the add course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Student student = fileUtil.readStudent(currentUser);
+        // This part has been added for debug
+        System.out.println(student.getUsername());
+        Set<String> courseList = fileUtil.listCourses(currentDepartment);
+       for (String course: courseList)
+           fileUtil.readCourse(course).writeForUser();
+       String code = "";
+       while (true) {
+           Write.print("To add a course type it's code: ", "green");  code = next();
+           if (!fileUtil.hasCourse(currentDepartment, code)) {
+               Write.println("Invalid course code!", "Pink");
+               continue;
+           }
+           Course course = fileUtil.readCourse(code);
+           if (!student.getTimeTable().canAdd(course.getTimeTable())) {
+               Write.println("This course has time interference with previous courses", "Pink");
+               continue;
+           }
+           if (course.getCapacity() == 0) {
+               Write.println("Course capacity is 0!", "Pink");
+               continue;
+           }
+           student.addCourse(course);
+           course.setCapacity(course.getCapacity() - 1);
+           fileUtil.writeCourse(course);
+           Write.println("Course has been successfully added to your course list :)", "Yellow");
+       }
+    }
+    private static void onStudentDepartments() {
+        Write.println("This is the department page. If you want to go to the previous page, type \"back\" at any time", "Orange");
+        Write.println("*".repeat(25) + "Department list" + "*".repeat(25), "Green");
+        Set<String> departmentList = fileUtil.readDepartmentList();
+        for (String s: departmentList) System.out.println(" ".repeat(33 - s.length() / 2) + s);
+        Write.println("*".repeat(65), "Green");
+        String department = "";
+        while (!fileUtil.hasDepartment(department)) {
+            Write.print("Choose department ", "Green"); department = next();
+            if (fileUtil.hasDepartment(department))
+                break;
+            Write.println("invalid department", "pink");
+        }
+        currentDepartment = department;
+        runFunction(Page.allCourses);
     }
     private static String next() {
         String s = sc.next();
@@ -60,7 +153,7 @@ public class Application {
     }
     private static void onAddCourse() { // Fellan add va modifie yek karo mikonan
         try {
-            Write.println("This is the add course. If you want to go to the previous page, type \"back\" at any time", "Orange");
+            Write.println("This is the add course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
             Course course;
             do {
                 Write.print("course type:(General/Specialized) ", "green");
@@ -142,7 +235,6 @@ public class Application {
         for (String s: departmentList) System.out.println(" ".repeat(33 - s.length() / 2) + s);
         Write.println("*".repeat(65), "Green");
         String department = "";
-        Scanner sc = new Scanner(System.in);
         while (!fileUtil.hasDepartment(department)) {
             Write.print("Choose department ", "Green"); department = next();
             if (fileUtil.hasDepartment(department))
@@ -155,7 +247,6 @@ public class Application {
     private static void onAdminDepartment() {
         Write.println("This is the add/remove course page. If you want to go to the previous page, type \"back\" at any time", "Orange");
         Write.print("to add a course write \"add\" and to remove a course write \"remove\" ", "green");
-        Scanner sc = new Scanner(System.in);
         String type = next();
         if (type.equals("add"))
             runFunction(Page.addCourse);
@@ -169,16 +260,15 @@ public class Application {
     }
     private static void onStudent() {
         Write.println("This is the student page. If you want to go to the previuse page, type \"back\"", "orange");
-        Write.println("To see your courses type \"myCourses\" and to see all Department courses type \"allCourses\"", "green");
-        String type = "";
         while (true) {
-            type = next();
+            Write.print("To see your courses type \"myCourses\" and to see all Department courses type \"allCourses\"" , "green");
+            String type = next();
             if (type.equals("myCourses")) {
                 runFunction(Page.myCourses);
                 return;
             }
             if (type.equals("allCourses")) {
-                runFunction(Page.allCourses);
+                runFunction(Page.studentDepartments);
                 return;
             }
             Write.println("Command not found!", "pink");

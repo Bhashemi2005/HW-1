@@ -100,6 +100,7 @@ public class Course {
     }
     public void writeForUser() {
         Write.println("-".repeat(200), "yellow");
+        Write.print("Code: ", "GREEN"); Write.println(getCode(), "ORANGE");
         Write.print("Type: ", "GREEN"); Write.println(getType(), "ORANGE");
         Write.print("Name: ", "GREEN"); Write.println(getName(), "ORANGE");
         Write.print("Teacher: ", "GREEN"); Write.println(getTeacher(), "ORANGE");

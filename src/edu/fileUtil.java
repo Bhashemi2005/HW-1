@@ -37,19 +37,9 @@ public class fileUtil {
             FileWriter fileWriter = new FileWriter(file);
             // write password
             fileWriter.write(student.getPassword() + "\n");
-            // write unit
-            fileWriter.append(student.getUnit() + "\n");
-            // write timeTable
-            TimeTable timeTable = student.getTimeTable();
-            for (int i = 0; i < 7; i++) {
-                for (int j = 0; j < 24; j++)
-                    for (int k = 0; k < 2; k++)
-                        fileWriter.append((timeTable.getCell(i, j, k)? "1 ": "0 "));
-                fileWriter.append("\n");
-            }
             // write courseList
             for (Course course: student.getCourseList())
-                fileWriter.append(course.getPath() + "\n");
+                fileWriter.append(course.getCode() + "\n");
             fileWriter.close();
         } catch (Exception e) {
             System.out.println("Something went wrong. Please try again later");
@@ -66,6 +56,9 @@ public class fileUtil {
         }
         return result;
     }
+    public static Set<String> listCourses(String department) {
+        return listData("src/edu/file/departments/" + department);
+    }
     public static Student readStudent(String code) {
         try {
             File file = new File("src/edu/file/students/" + code);
@@ -75,13 +68,8 @@ public class fileUtil {
             }
             Scanner sc = new Scanner(file);
             Student student = new Student(code, sc.next());
-            student.setUnit(sc.nextInt());
-            for (int i = 0; i < 7; i++)
-                for (int j = 0; j < 24; j++)
-                    for (int k = 0; k < 2; k++)
-                        student.getTimeTable().setCell(i, j, k, (sc.nextInt() == 1));
             while (sc.hasNext())
-                student.getCourseList().add(readCourse(sc.next()));
+                student.addCourse(readCourse(sc.next()));
             return student;
         } catch (Exception e) {
             System.out.println("something went wrong. please try again later");
@@ -93,17 +81,30 @@ public class fileUtil {
                 .map(File::getName)
                 .collect(Collectors.toSet());
     }
+    public static Set<String> listStudents() {
+        return listData("src/edu/file/students");
+    }
+    public static void removeCourse(String department, String code) {
+        File file = new File("src/edu/file/departments/" + department + "/" + code);
+        //FileUtils.deleteDirectory(file);
+    }
     public static boolean hasStudent(String code) {
-        for (String s: listData("src/edu/file/students"))
-            if (code.equals(s))
-                return true;
-        return false;
+        if (code.length() == 0)
+            return false;
+        File file = new File("src/edu/file/students/" + code);
+        return file.exists();
     }
     public static boolean hasDepartment(String department) {
-        for (String s: listData("src/edu/file/departments"))
-            if (department.equals(s))
-                return true;
-        return false;
+        if (department.length() == 0)
+            return false;
+        File file = new File("src/edu/file/departments/" + department);
+        return file.exists();
+    }
+    public static boolean hasCourse(String department, String code) {
+        if (department.length() == 0 || code.length() == 0)
+            return false;
+        File file = new File("src/edu/file/departments/" + department + "/" + code);
+        return file.exists();
     }
     public static String findDepartment(String code) {
         String current = "src/edu/file/departments";
@@ -143,7 +144,7 @@ public class fileUtil {
             return null;
         }
     }
-    public static void writeCourse(Course course) throws Exception {
+    public static void writeCourse(Course course) {
         try {
             File file = new File("src/edu/file/departments/" + course.getDepartment() + "/" + course.getCode());
             file.createNewFile();
@@ -160,8 +161,7 @@ public class fileUtil {
                 fileWriter.append(student + "\n");
             fileWriter.close();
         } catch (Exception e) {
-            throw new Exception(e);
-            //System.out.println("something went wrong please try again later :((( ");
+            System.out.println("something went wrong please try again later :((( ");
         }
     }
 }
