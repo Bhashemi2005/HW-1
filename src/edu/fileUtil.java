@@ -21,9 +21,12 @@ public class fileUtil {
         }
     }
     public static Admin readAdmin() {
+        File file = new File("src/edu/file/admin");
+        return readAdmin(file);
+    }
+    public static Admin readAdmin(File file) {
         Scanner sc = new Scanner(System.in);
         try {
-            File file = new File("src/edu/file/admin");
             sc = new Scanner(file);
             String s = sc.next();
             sc.close();
@@ -62,27 +65,6 @@ public class fileUtil {
     }
     public static Set<String> listCourses(String department) {
         return listData("src/edu/file/departments/" + department);
-    }
-    public static Student readStudent(String code) {
-        Scanner sc = new Scanner(System.in);
-        try {
-            File file = new File("src/edu/file/students/" + code);
-            if (!file.exists()) {
-                System.out.println("This username does not exist!");
-                sc.close();
-                return null;
-            }
-            sc = new Scanner(file);
-            Student student = new Student(code, sc.next());
-            while (sc.hasNext())
-                student.addCourse(readCourse(sc.next()));
-            sc.close();
-            return student;
-        } catch (Exception e) {
-            System.out.println("something went wrong. please try again later");
-            sc.close();
-            return null;
-        }
     }
     public static Set<String> listData(String dir) {
         return Stream.of(new File(dir).listFiles())
@@ -133,14 +115,17 @@ public class fileUtil {
         return null;
     }
     public static Course readCourse(String s) {
+        String department = findDepartment(s);
+        File file = new File("src/edu/file/departments/" + department + "/" + s);
+        return readCourse(s, file);
+    }
+    public static Course readCourse(String s, File file) {
         Scanner sc = new Scanner(System.in);
         try {
-            String department = findDepartment(s);
-            File file = new File("src/edu/file/departments/" + department + "/" + s);
             sc = new Scanner(file);
             String type = sc.next();
             Course course = (type.equals("General")? new General(): new Specialized());
-            course.setDepartment(department);
+            course.setDepartment(findDepartment(s));
             course.setCode(s);
             course.setName(sc.next());
             course.setTeacher(sc.next());
@@ -158,6 +143,30 @@ public class fileUtil {
             return course;
         } catch (Exception e) {
             System.out.println("Something went wrong. please try again later");
+            sc.close();
+            return null;
+        }
+    }
+    public static Student readStudent(String code) {
+        File file = new File("src/edu/file/students/" + code);
+        return readStudent(code, file);
+    }
+    public static Student readStudent(String code, File file) {
+        Scanner sc = new Scanner(System.in);
+        try {
+            if (!file.exists()) {
+                System.out.println("This username does not exist!");
+                sc.close();
+                return null;
+            }
+            sc = new Scanner(file);
+            Student student = new Student(code, sc.next());
+            while (sc.hasNext())
+                student.addCourse(readCourse(sc.next()));
+            sc.close();
+            return student;
+        } catch (Exception e) {
+            System.out.println("something went wrong. please try again later");
             sc.close();
             return null;
         }
