@@ -41,7 +41,7 @@ public class fileUtil {
             sc.close();
             return new Admin(s);
         } catch (Exception e) {
-            System.out.println("The admin file has been removed");
+            Write.println("The admin file has been removed", "Pink");
             sc.close();
             return null;
         }
@@ -49,7 +49,7 @@ public class fileUtil {
     public static void writeStudent(Student student) {
         try {
             File file = new File("src/edu/file/students/" + student.getUsername());
-            file.createNewFile();
+            if(!file.exists()) file.createNewFile();
             writeStudent(student, file);
         } catch (Exception e) {
             System.out.println("Something went wrong. Please try again later");
@@ -190,7 +190,7 @@ public class fileUtil {
     public static void writeCourse(Course course) {
         try {
             File file = new File("src/edu/file/departments/" + course.getDepartment() + "/" + course.getCode());
-            file.createNewFile();
+            if(!file.exists()) file.createNewFile();
             writeCourse(course, file);
         } catch (Exception e) {
             Write.println("Your course has invalid data", "pink");
@@ -215,4 +215,29 @@ public class fileUtil {
         }
     }
     // for import export files
+    public static void writeFiles(String dir) {
+        try {
+            File file = new File(dir);
+            file.mkdirs();
+            // write admin
+            writeAdmin(readAdmin(), new File(dir + "/admin"));
+            // write students
+            new File(dir + "/students").mkdirs();
+            Set<String> students = listStudents();
+            for (String student : students) {
+                writeStudent(readStudent(student), new File(dir + "/students/" + student));
+            }
+            // write departments
+            new File(dir + "/departments").mkdirs();
+            Set<String> departments = readDepartmentList();
+            for (String department : departments) new File(dir + "/departments/"+ department).mkdirs();
+            for (String department: departments) {
+                Set<String> courses = listCourses(department);
+                for (String course: courses)
+                    writeCourse(readCourse(course), new File (dir + "/departments/" + department + "/" + course));
+            }
+        } catch (Exception e) {
+            Write.println("Something went wrong. Please try again later", "pink");
+        }
+    }
 }

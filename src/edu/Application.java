@@ -81,26 +81,30 @@ public class Application {
     private static void onFirstPage() {
         try {
             while (true) {
-                Write.print("To export current file type \"export [adminPassword] [file directory]\", to import a file type \"import [adminPassword] [file directory]\", else type continue: ", "Green");
+                Write.print("To export current file type \"export\", to import a file type \"import\", else type continue: ", "Green");
                 String type = next();
                 if (type.equals("continue")) {
                     runFunction(Page.secondPage);
                     return;
                 }
                 if (type.equals("export")) {
+                    Write.print("Please type admin password: ", "green");
                     String password = next();
                     Admin admin = fileUtil.readAdmin();
                     if (!password.equals(admin.getPassword())) {
                         Write.println("incorrect password", "Pink");
                         runFunction(Page.back);
                     }
+                    Write.print("Please type file directory: ", "green");
+                    fileUtil.writeFiles(next());
                     runFunction(Page.firstPage);
                     return;
                 }
                 Write.println("Invalid code please try again", "Pink");
             }
         } catch (Exception e) {
-
+            Write.println("Invalid input", "Pink");
+            runFunction(Page.back);
         }
     }
     private static void onModifyCourse() {
