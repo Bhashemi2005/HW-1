@@ -1,5 +1,6 @@
 package edu;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,6 +22,10 @@ public class Application {
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
+            if (functionSequence.getLast() == Page.firstPage) {
+                runFunction(Page.firstPage);
+                return;
+            }
             functionSequence.removeLast();
             runFunction(functionSequence.getLast());
             return;
@@ -74,15 +79,28 @@ public class Application {
         }
     }
     private static void onFirstPage() {
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            Write.print("To export current file type \"export [adminPassword] [file directory]\", to import a file type \"import [adminPassword] [file directory]\", else type continue: ", "Green");
-            String type = scanner.next();
-            if (type.equals("continue")) {
-                runFunction(Page.secondPage);
-                return;
+        try {
+            while (true) {
+                Write.print("To export current file type \"export [adminPassword] [file directory]\", to import a file type \"import [adminPassword] [file directory]\", else type continue: ", "Green");
+                String type = next();
+                if (type.equals("continue")) {
+                    runFunction(Page.secondPage);
+                    return;
+                }
+                if (type.equals("export")) {
+                    String password = next();
+                    Admin admin = fileUtil.readAdmin();
+                    if (!password.equals(admin.getPassword())) {
+                        Write.println("incorrect password", "Pink");
+                        runFunction(Page.back);
+                    }
+                    runFunction(Page.firstPage);
+                    return;
+                }
+                Write.println("Invalid code please try again", "Pink");
             }
-            Write.println("Invalid code please try again", "Pink");
+        } catch (Exception e) {
+
         }
     }
     private static void onModifyCourse() {
@@ -385,7 +403,7 @@ public class Application {
             runFunction(Page.signUp);
         else {
             Write.println("command not found!", "Pink");
-            runFunction(Page.firstPage);
+            runFunction(Page.secondPage);
         }
     }
     private static void onFirstAdmin() {

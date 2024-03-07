@@ -2,6 +2,8 @@ package edu;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -13,6 +15,13 @@ public class fileUtil {
         try {
             File file = new File("src/edu/file/admin");
             if(!file.exists()) file.createNewFile();
+            writeAdmin(admin, file);
+        } catch (Exception e) {
+            System.out.println("Something went wrong. Please try again later");
+        }
+    }
+    public static void writeAdmin(Admin admin, File file) {
+        try {
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(admin.getPassword());
             fileWriter.close();
@@ -41,6 +50,13 @@ public class fileUtil {
         try {
             File file = new File("src/edu/file/students/" + student.getUsername());
             file.createNewFile();
+            writeStudent(student, file);
+        } catch (Exception e) {
+            System.out.println("Something went wrong. Please try again later");
+        }
+    }
+    public static void writeStudent(Student student, File file) {
+        try {
             FileWriter fileWriter = new FileWriter(file);
             // write password
             fileWriter.write(student.getPassword() + "\n");
@@ -175,6 +191,13 @@ public class fileUtil {
         try {
             File file = new File("src/edu/file/departments/" + course.getDepartment() + "/" + course.getCode());
             file.createNewFile();
+            writeCourse(course, file);
+        } catch (Exception e) {
+            Write.println("Your course has invalid data", "pink");
+        }
+    }
+    public static void writeCourse(Course course, File file) {
+        try {
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(course.getType() + "\n");
             fileWriter.append(course.getName() + "\n");
@@ -188,7 +211,8 @@ public class fileUtil {
                 fileWriter.append(student + "\n");
             fileWriter.close();
         } catch (Exception e) {
-            System.out.println("something went wrong please try again later :((( ");
+            Write.println("Your course has invalid data", "pink");
         }
     }
+    // for import export files
 }
