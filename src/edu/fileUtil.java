@@ -2,8 +2,6 @@ package edu;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -15,13 +13,6 @@ public class fileUtil {
         try {
             File file = new File("src/edu/file/admin");
             if(!file.exists()) file.createNewFile();
-            writeAdmin(admin, file);
-        } catch (Exception e) {
-            System.out.println("Something went wrong. Please try again later");
-        }
-    }
-    public static void writeAdmin(Admin admin, File file) {
-        try {
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(admin.getPassword());
             fileWriter.close();
@@ -41,7 +32,7 @@ public class fileUtil {
             sc.close();
             return new Admin(s);
         } catch (Exception e) {
-            Write.println("The admin file has been removed", "Pink");
+            System.out.println("The admin file has been removed");
             sc.close();
             return null;
         }
@@ -49,14 +40,7 @@ public class fileUtil {
     public static void writeStudent(Student student) {
         try {
             File file = new File("src/edu/file/students/" + student.getUsername());
-            if(!file.exists()) file.createNewFile();
-            writeStudent(student, file);
-        } catch (Exception e) {
-            System.out.println("Something went wrong. Please try again later");
-        }
-    }
-    public static void writeStudent(Student student, File file) {
-        try {
+            file.createNewFile();
             FileWriter fileWriter = new FileWriter(file);
             // write password
             fileWriter.write(student.getPassword() + "\n");
@@ -190,14 +174,7 @@ public class fileUtil {
     public static void writeCourse(Course course) {
         try {
             File file = new File("src/edu/file/departments/" + course.getDepartment() + "/" + course.getCode());
-            if(!file.exists()) file.createNewFile();
-            writeCourse(course, file);
-        } catch (Exception e) {
-            Write.println("Your course has invalid data", "pink");
-        }
-    }
-    public static void writeCourse(Course course, File file) {
-        try {
+            file.createNewFile();
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(course.getType() + "\n");
             fileWriter.append(course.getName() + "\n");
@@ -211,33 +188,7 @@ public class fileUtil {
                 fileWriter.append(student + "\n");
             fileWriter.close();
         } catch (Exception e) {
-            Write.println("Your course has invalid data", "pink");
-        }
-    }
-    // for import export files
-    public static void writeFiles(String dir) {
-        try {
-            File file = new File(dir);
-            file.mkdirs();
-            // write admin
-            writeAdmin(readAdmin(), new File(dir + "/admin"));
-            // write students
-            new File(dir + "/students").mkdirs();
-            Set<String> students = listStudents();
-            for (String student : students) {
-                writeStudent(readStudent(student), new File(dir + "/students/" + student));
-            }
-            // write departments
-            new File(dir + "/departments").mkdirs();
-            Set<String> departments = readDepartmentList();
-            for (String department : departments) new File(dir + "/departments/"+ department).mkdirs();
-            for (String department: departments) {
-                Set<String> courses = listCourses(department);
-                for (String course: courses)
-                    writeCourse(readCourse(course), new File (dir + "/departments/" + department + "/" + course));
-            }
-        } catch (Exception e) {
-            Write.println("Something went wrong. Please try again later", "pink");
+            System.out.println("something went wrong please try again later :((( ");
         }
     }
 }
