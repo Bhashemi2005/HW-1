@@ -162,7 +162,7 @@ public class fileUtil {
             sc = new Scanner(file);
             Student student = new Student(code, sc.next());
             while (sc.hasNext())
-                student.addCourse(readCourse(sc.next()));
+                student.writeCourse(readCourse(sc.next()));
             sc.close();
             return student;
         } catch (Exception e) {
@@ -189,6 +189,53 @@ public class fileUtil {
             fileWriter.close();
         } catch (Exception e) {
             System.out.println("something went wrong please try again later :((( ");
+        }
+    }
+    public static void fileCopy(File from, File to) {
+        try {
+            if (!to.exists()) to.createNewFile();
+            Scanner sc = new Scanner(from);
+            FileWriter fileWriter = new FileWriter(to);
+            fileWriter.write("");
+            while (sc.hasNext())
+                fileWriter.append(sc.nextLine() + "\n");
+            fileWriter.close();
+            sc.close();
+        } catch (Exception e) {
+        }
+    }
+    public static void exportProject(String s) {
+        copyProject("src/edu/file", s);
+    }
+    public static void importProject(String s) {
+        copyProject(s, "src/edu/file");
+    }
+    public static void copyProject(String from, String to) {
+        try {
+            // make file
+            if (new File(to).exists())
+                new File(to).delete();
+            new File(to).mkdirs();
+            // write admin
+            fileCopy(new File(from + "/admin"), new File(to + "/admin"));
+            // write students
+            new File(to + "/students").mkdirs();
+            Set<String> students = listData(from + "/students");
+            for (String student: students)
+                fileCopy(new File(from + "/students/" + student), new File(to + "/students/" + student));
+            // write departments
+            new File(to  + "/departments").mkdirs();
+            Set<String> departments = listData(from + "/departments");
+            for (String department: departments) {
+                new File(to + "/departments/" + department).mkdirs();
+                Set<String> courses = listData(from + "/departments/" + department);
+                for (String course: courses)
+                    fileCopy(new File(from + "/departments/" + department + "/" + course),
+                            new File(to + "/departments/" + department + "/" + course));
+            }
+        } catch (Exception e) {
+            Write.println("Invalid input", "pink");
+            return;
         }
     }
 }

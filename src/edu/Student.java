@@ -22,6 +22,13 @@ public class Student extends User {
         fileUtil.writeCourse(course);
         fileUtil.writeStudent(this);
     }
+    public void writeCourse(Course course) {
+        courseList.add(course);
+        timeTable.addTable(course.getTimeTable());
+        unit += course.getUnit();
+        if (course instanceof General)
+            generalCount++;
+    }
     public boolean canAddCourse(Course course) {
         return (course.getUnit() + unit < 20) && timeTable.canAdd(course.getTimeTable())
                 && (!(course instanceof General) || generalCount < 5);

@@ -21,6 +21,10 @@ public class Application {
     }
     private static void runFunction(Page page) {
         if (page == Page.back) {
+            if (functionSequence.getLast() == Page.firstPage) {
+                runFunction(Page.firstPage);
+                return;
+            }
             functionSequence.removeLast();
             runFunction(functionSequence.getLast());
             return;
@@ -74,15 +78,44 @@ public class Application {
         }
     }
     private static void onFirstPage() {
-        Scanner scanner = new Scanner(System.in);
         while (true) {
-            Write.print("To export current file type \"export [adminPassword] [file directory]\", to import a file type \"import [adminPassword] [file directory]\", else type continue: ", "Green");
-            String type = scanner.next();
+            Write.print("To export current file type \"export\", to import a file type \"import\", else type continue: ", "Green");
+            String type = next();
             if (type.equals("continue")) {
                 runFunction(Page.secondPage);
                 return;
             }
+            if (type.equals("export")) {
+                Admin admin = fileUtil.readAdmin();
+                Write.print("Please enter admin password: ", "green");
+                if (!admin.getPassword().equals(next())) {
+                    Write.print("Incorrect password", "Pink");
+                    runFunction(Page.back);
+                    return;
+                }
+                Write.print("Please enter directory: ", "Green");
+                fileUtil.exportProject(next());
+                Write.println("command has been terminated", "Yellow");
+                runFunction(Page.back);
+                return;
+            }
+            if (type.equals("import")) {
+                Admin admin = fileUtil.readAdmin();
+                Write.print("Please enter admin password: ", "green");
+                if (!admin.getPassword().equals(next())) {
+                    Write.print("Incorrect password", "Pink");
+                    runFunction(Page.back);
+                    return;
+                }
+                Write.print("Please enter directory: ", "Green");
+                fileUtil.importProject(next());
+                Write.println("command has been terminated", "Yellow");
+                runFunction(Page.back);
+                return;
+            }
             Write.println("Invalid code please try again", "Pink");
+            runFunction(Page.back);
+            return;
         }
     }
     private static void onModifyCourse() {
