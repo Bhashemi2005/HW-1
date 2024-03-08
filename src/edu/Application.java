@@ -89,7 +89,7 @@ public class Application {
                 Admin admin = fileUtil.readAdmin();
                 Write.print("Please enter admin password: ", "green");
                 if (!admin.getPassword().equals(next())) {
-                    Write.print("Incorrect password", "Pink");
+                    Write.println("Incorrect password", "Pink");
                     runFunction(Page.back);
                     return;
                 }
@@ -103,7 +103,7 @@ public class Application {
                 Admin admin = fileUtil.readAdmin();
                 Write.print("Please enter admin password: ", "green");
                 if (!admin.getPassword().equals(next())) {
-                    Write.print("Incorrect password", "Pink");
+                    Write.println("Incorrect password", "Pink");
                     runFunction(Page.back);
                     return;
                 }
